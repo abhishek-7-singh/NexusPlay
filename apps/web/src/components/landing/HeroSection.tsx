@@ -17,7 +17,7 @@ const wordVariants = {
     transition: {
       duration: 0.6,
       delay: i * 0.12,
-      ease: [0.4, 0, 0.2, 1],
+      ease: [0.4, 0, 0.2, 1] as const,
     },
   }),
 };
@@ -31,7 +31,7 @@ const buttonVariants = {
     transition: {
       duration: 0.5,
       delay: 1.2 + i * 0.15,
-      ease: [0.4, 0, 0.2, 1],
+      ease: [0.4, 0, 0.2, 1] as const,
     },
   }),
 };
