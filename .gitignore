@@ -1,0 +1,11 @@
+node_modules
+.next
+.turbo
+dist
+build
+*.log
+.env
+.env.*
+!.env.example
+.vscode
+.DS_Store

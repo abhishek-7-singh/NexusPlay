@@ -1,0 +1,194 @@
+@import "tailwindcss";
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/500.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/inter/700.css";
+@import "@fontsource/inter/800.css";
+@import "@fontsource/inter/900.css";
+@import "@fontsource/orbitron/400.css";
+@import "@fontsource/orbitron/700.css";
+@import "@fontsource/orbitron/900.css";
+
+/* ============================================================
+   DESIGN TOKENS — Premium Gaming Client (Riot/Steam/Discord style)
+   ============================================================ */
+
+@theme {
+  /* Core Colors */
+  --color-base-900: #090909; /* Deepest background */
+  --color-base-800: #111111; /* Secondary background */
+  --color-base-700: #1A1A1A; /* Borders / Subtle accents */
+  --color-base-600: #262626; /* Hover states */
+  --color-base-500: #404040; /* Disabled / Muted */
+  
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #A3A3A3;
+  --color-text-muted: #525252;
+
+  /* Accents - Used sparingly for focus */
+  --color-accent-blue: #00D4FF;
+  --color-accent-cyan: #06B6D4;
+  --color-accent-purple: #8B5CF6;
+  --color-accent-white: #FFFFFF;
+
+  /* Specific semantic colors */
+  --color-status-online: #10B981;
+  --color-status-offline: #525252;
+  --color-status-ingame: #8B5CF6;
+
+  /* Typography */
+  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-display: "Orbitron", "Inter", system-ui, sans-serif;
+
+  /* Border Radius Constraints */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  /* Custom Transitions */
+  --animate-shimmer: shimmer 2s linear infinite;
+  --animate-float: float-slow 10s ease-in-out infinite;
+}
+
+/* ============================================================
+   BASE STYLES
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--color-base-900);
+}
+
+body {
+  font-family: var(--font-sans);
+  background: var(--color-base-900);
+  color: var(--color-text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+  line-height: 1.5;
+}
+
+/* Cinematic Background Depth */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(26, 26, 26, 0.4) 0%, transparent 60%);
+  z-index: -2;
+  pointer-events: none;
+}
+
+/* Subtle noise texture for software feel */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* ============================================================
+   SCROLLBAR (Premium Client Look)
+   ============================================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-base-900);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-base-700);
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--color-base-900); /* gives a floating look */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-base-500);
+}
+
+/* ============================================================
+   ANIMATIONS (120FPS feel, no bouncing)
+   ============================================================ */
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ============================================================
+   GLASS / OVERLAY UTILITIES 
+   Strictly scoped for Nav, Sidebar, Dialogs
+   ============================================================ */
+
+.client-overlay {
+  background: rgba(17, 17, 17, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.client-sidebar {
+  background: rgba(17, 17, 17, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-left: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+/* ============================================================
+   TYPOGRAPHY HIERARCHY
+   ============================================================ */
+
+.client-heading-1 {
+  font-family: var(--font-sans);
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+  line-height: 1.1;
+}
+
+.client-heading-2 {
+  font-family: var(--font-sans);
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+}
+
+.client-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+/* ============================================================
+   HIDE SCROLLBAR UTILITY
+   ============================================================ */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
