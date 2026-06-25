@@ -27,7 +27,7 @@ export default function TicTacToePage() {
     [0, 4, 8], [2, 4, 6]             // diagonals
   ];
 
-  const checkWinner = (squares: Player[]) => {
+  const checkWinner = (squares: Player[]): { winner: Player | "Draw", line: number[] | null } | null => {
     for (let i = 0; i < WIN_LINES.length; i++) {
       const [a, b, c] = WIN_LINES[i];
       if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
