@@ -44,7 +44,7 @@ export class BaseGameState extends Schema {
 
 export abstract class BaseGameRoom<TState extends BaseGameState> extends Room<TState> {
   maxClients = 2;
-  autoDispose = true;
+  override get autoDispose() { return true; }
   private turnTimer: Delayed | null = null;
   protected botClients: Map<string, NodeJS.Timeout> = new Map();
 

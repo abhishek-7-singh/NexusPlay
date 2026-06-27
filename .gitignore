@@ -9,3 +9,27 @@ build
 !.env.example
 .vscode
 .DS_Store
+
+# AI coding assistant configs
+AGENTS.md
+CLAUDE.md
+AGENT_SPEC.md
+GEMINI.md
+CONVENTIONS.md
+copilot-instructions.md
+.cursorrules
+.cursorignore
+.aiderignore
+.agents/
+.cursor/
+.copilot/
+.aider/
+.gemini/
+*_SPEC.md
+*.spec.md
+
+# IDE
+.idea/
+
+# OS
+Thumbs.db

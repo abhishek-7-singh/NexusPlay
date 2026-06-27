@@ -1,6 +1,5 @@
 import { Server } from 'colyseus';
 import { WebSocketTransport } from '@colyseus/ws-transport';
-import { monitor } from '@colyseus/monitor';
 import express from 'express';
 import cors from 'cors';
 import http from 'http';
@@ -31,8 +30,10 @@ app.get('/health', (_req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
 
-// Colyseus monitor (admin dashboard)
-app.use('/colyseus', monitor());
+// Colyseus monitor (optional admin dashboard — disabled due to peer dep issue)
+// To re-enable: npm install @colyseus/core@0.15 then uncomment
+// import { monitor } from '@colyseus/monitor';
+// app.use('/colyseus', monitor());
 
 const server = http.createServer(app);
 

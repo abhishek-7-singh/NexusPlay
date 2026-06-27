@@ -143,7 +143,7 @@ export class TicTacToeRoom extends BaseGameRoom<TicTacToeState> {
     if (!this.bot) return;
 
     // Get the board as a simple array
-    const board = Array.from(this.state.board);
+    const board = Array.from(this.state.board) as string[];
     const botSymbol = botId === this.state.playerX ? 'X' : 'O';
 
     // Bot "thinks" for a realistic delay

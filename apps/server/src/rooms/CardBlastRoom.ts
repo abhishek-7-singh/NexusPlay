@@ -157,7 +157,7 @@ export class CardBlastRoom extends BaseGameRoom<CardBlastGameState> {
     this.discardPile.push(firstCard);
 
     // Set first player
-    this.state.currentTurnId = this.state.playerOrder[0];
+    this.state.currentTurnId = this.state.playerOrder[0]!;
 
     // Update playable cards for current player
     this.updatePlayableCards(this.state.currentTurnId);
@@ -192,7 +192,7 @@ export class CardBlastRoom extends BaseGameRoom<CardBlastGameState> {
     }
 
     if (this.state.playerOrder.length <= 1 && this.state.playerOrder.length > 0) {
-      this.endGame(this.state.playerOrder[0]);
+      this.endGame(this.state.playerOrder[0] ?? null);
     }
 
     if (this.state.currentTurnId === playerId) {
@@ -215,6 +215,7 @@ export class CardBlastRoom extends BaseGameRoom<CardBlastGameState> {
     if (cardIndex === -1) return;
 
     const card = cardPlayer.hand[cardIndex];
+    if (!card) return;
 
     // Validate play
     if (!this.isCardPlayable(card)) return;
@@ -364,7 +365,7 @@ export class CardBlastRoom extends BaseGameRoom<CardBlastGameState> {
     let steps = skipNext ? 2 : 1;
 
     this.state.turnIndex = (this.state.turnIndex + steps * direction + this.state.playerOrder.length * 10) % this.state.playerOrder.length;
-    this.state.currentTurnId = this.state.playerOrder[this.state.turnIndex];
+    this.state.currentTurnId = this.state.playerOrder[this.state.turnIndex]!;
 
     // Apply pending draw cards to next player
     if (this.state.pendingDrawCards > 0 && !skipNext) {
@@ -381,7 +382,7 @@ export class CardBlastRoom extends BaseGameRoom<CardBlastGameState> {
 
         // Skip their turn
         this.state.turnIndex = (this.state.turnIndex + direction + this.state.playerOrder.length) % this.state.playerOrder.length;
-        this.state.currentTurnId = this.state.playerOrder[this.state.turnIndex];
+        this.state.currentTurnId = this.state.playerOrder[this.state.turnIndex]!;
       }
     }
 

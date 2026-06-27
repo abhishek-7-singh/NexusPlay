@@ -106,7 +106,7 @@ export class LudoRoom extends BaseGameRoom<LudoGameState> {
     });
 
     // First player's turn
-    this.state.currentTurnId = this.state.playerOrder[0];
+    this.state.currentTurnId = this.state.playerOrder[0]!;
 
     // Trigger bot if first player is bot
     const firstPlayer = this.state.players.get(this.state.currentTurnId);
@@ -133,7 +133,7 @@ export class LudoRoom extends BaseGameRoom<LudoGameState> {
 
     // Check if only one player left
     if (this.state.playerOrder.length <= 1 && this.state.playerOrder.length > 0) {
-      this.endGame(this.state.playerOrder[0]);
+      this.endGame(this.state.playerOrder[0] ?? null);
     }
 
     // If it was their turn, move to next
@@ -195,6 +195,7 @@ export class LudoRoom extends BaseGameRoom<LudoGameState> {
     if (tokenIndex < 0 || tokenIndex >= 4) return;
 
     const token = ludoPlayer.tokens[tokenIndex];
+    if (!token) return;
     if (!this.isValidMove(ludoPlayer, token)) return;
 
     // Execute the move
@@ -262,7 +263,8 @@ export class LudoRoom extends BaseGameRoom<LudoGameState> {
   private getValidMoves(ludoPlayer: LudoPlayerState): number[] {
     const validMoves: number[] = [];
     for (let i = 0; i < 4; i++) {
-      if (this.isValidMove(ludoPlayer, ludoPlayer.tokens[i])) {
+      const t = ludoPlayer.tokens[i];
+      if (t && this.isValidMove(ludoPlayer, t)) {
         validMoves.push(i);
       }
     }
@@ -303,7 +305,7 @@ export class LudoRoom extends BaseGameRoom<LudoGameState> {
     // Move to next player in order
     const currentIdx = this.state.playerOrder.indexOf(this.state.currentTurnId);
     const nextIdx = (currentIdx + 1) % this.state.playerOrder.length;
-    this.state.currentTurnId = this.state.playerOrder[nextIdx];
+    this.state.currentTurnId = this.state.playerOrder[nextIdx]!;
     this.state.turnOrder++;
 
     // Trigger bot
