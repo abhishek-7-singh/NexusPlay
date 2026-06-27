@@ -1,23 +1,31 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
-import { Chess, Square, Move } from "chess.js";
-import { ChevronLeft, RefreshCcw, Settings2, Activity, Shield, Swords } from "lucide-react";
+import { Chess, Move, Square } from "chess.js";
+import { Activity, ChevronLeft, RefreshCcw, Settings2, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-// ============================================================
-// Chess Redesign — Premium Client Aesthetic
-// ============================================================
 
 type Difficulty = "easy" | "medium" | "hard";
 
 const PIECE_SYMBOLS: Record<string, string> = {
-  p: "♟", n: "♞", b: "♝", r: "♜", q: "♛", k: "♚",
-  P: "♙", N: "♘", B: "♗", R: "♖", Q: "♕", K: "♔",
+  p: "p",
+  n: "n",
+  b: "b",
+  r: "r",
+  q: "q",
+  k: "k",
+  P: "P",
+  N: "N",
+  B: "B",
+  R: "R",
+  Q: "Q",
+  K: "K",
 };
+
+const boardRows = ["8", "7", "6", "5", "4", "3", "2", "1"];
+const boardCols = ["a", "b", "c", "d", "e", "f", "g", "h"];
 
 export default function ChessPage() {
   const [game, setGame] = useState(new Chess());
@@ -25,7 +33,6 @@ export default function ChessPage() {
   const [selectedSquare, setSelectedSquare] = useState<Square | null>(null);
   const [validMoves, setValidMoves] = useState<Move[]>([]);
   const [difficulty, setDifficulty] = useState<Difficulty>("medium");
-  const [isBotThinking, setIsBotThinking] = useState(false);
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const [gameOver, setGameOver] = useState(false);
   const [status, setStatus] = useState("Your turn (White)");
@@ -41,7 +48,7 @@ export default function ChessPage() {
       setStatus("Game drawn.");
       setGameOver(true);
     } else if (game.isCheck()) {
-      setStatus("Check!");
+      setStatus("Check.");
     } else {
       setStatus(game.turn() === "w" ? "Your turn (White)" : "Bot is thinking...");
     }
@@ -49,20 +56,27 @@ export default function ChessPage() {
 
   const makeBotMove = useCallback(() => {
     if (game.isGameOver()) return;
-    setIsBotThinking(true);
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       const moves = game.moves({ verbose: true });
       if (moves.length === 0) return;
 
-      // Simple random bot for demonstration to keep code size small, 
-      // can be enhanced with Minimax later
-      const move = moves[Math.floor(Math.random() * moves.length)];
-      game.move(move);
+      const checks = moves.filter((move) => move.san.includes("+"));
+      const captures = moves.filter((move) => move.captured);
+      const promotions = moves.filter((move) => move.promotion);
+      const pool =
+        difficulty === "hard" && checks.length > 0
+          ? checks
+          : difficulty === "hard" && promotions.length > 0
+            ? promotions
+            : difficulty !== "easy" && captures.length > 0
+              ? captures
+              : moves;
+
+      game.move(pool[Math.floor(Math.random() * pool.length)]);
       updateGameState();
-      setIsBotThinking(false);
-    }, 600);
-  }, [game, updateGameState]);
+    }, 650);
+  }, [difficulty, game, updateGameState]);
 
   useEffect(() => {
     if (game.turn() === "b" && !gameOver) {
@@ -73,16 +87,10 @@ export default function ChessPage() {
   const handleSquareClick = (square: Square) => {
     if (gameOver || game.turn() === "b") return;
 
-    // If already selected, try to move
     if (selectedSquare) {
-      const move = validMoves.find((m) => m.to === square);
+      const move = validMoves.find((candidate) => candidate.to === square);
       if (move) {
-        // Handle promotion automatically to Queen for simplicity
-        if (move.promotion) {
-          game.move({ from: selectedSquare, to: square, promotion: "q" });
-        } else {
-          game.move({ from: selectedSquare, to: square });
-        }
+        game.move({ from: selectedSquare, to: square, promotion: move.promotion ? "q" : undefined });
         setSelectedSquare(null);
         setValidMoves([]);
         updateGameState();
@@ -90,7 +98,6 @@ export default function ChessPage() {
       }
     }
 
-    // Select piece
     const piece = game.get(square);
     if (piece && piece.color === game.turn()) {
       setSelectedSquare(square);
@@ -110,85 +117,66 @@ export default function ChessPage() {
     setMoveHistory([]);
     setGameOver(false);
     setStatus("Your turn (White)");
-    setIsBotThinking(false);
   };
 
-  const boardRows = ["8", "7", "6", "5", "4", "3", "2", "1"];
-  const boardCols = ["a", "b", "c", "d", "e", "f", "g", "h"];
-
   return (
-    <div className="flex-1 flex flex-col pt-20 px-8 pb-8 max-w-[1400px] mx-auto w-full">
-      {/* Game Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8 pb-6 border-b border-white/5">
+    <div className="mx-auto flex w-full max-w-[1400px] flex-1 flex-col px-6 py-10">
+      <div className="mb-8 flex flex-col justify-between gap-6 border-b border-white/5 pb-6 md:flex-row md:items-end">
         <div>
-          <div className="flex items-center gap-3 mb-4">
+          <div className="mb-4 flex items-center gap-3">
             <Button variant="ghost" size="icon" asChild className="h-8 w-8 bg-base-800 hover:bg-base-700">
-              <Link href="/games"><ChevronLeft className="w-4 h-4" /></Link>
+              <Link href="/games"><ChevronLeft className="h-4 w-4" /></Link>
             </Button>
             <div className="client-label">Chess</div>
           </div>
-          <h1 className="client-heading-1 text-4xl">Grandmaster AI</h1>
+          <h1 className="client-heading-1 text-4xl">Bot Practice</h1>
         </div>
 
-        {/* Status indicator */}
-        <div className="flex items-center gap-3 bg-base-800/50 px-5 py-3 rounded-lg border border-white/5">
-           <Activity className={cn("w-5 h-5", gameOver ? "text-red-500" : game.turn() === 'w' ? "text-accent-blue" : "text-text-muted animate-pulse")} />
-           <span className="text-sm font-semibold text-white">{status}</span>
+        <div className="flex items-center gap-3 rounded-lg border border-white/5 bg-base-800/50 px-5 py-3">
+          <Activity className={cn("h-5 w-5", gameOver ? "text-red-400" : game.turn() === "w" ? "text-accent-blue" : "animate-pulse text-text-muted")} />
+          <span className="text-sm font-semibold text-white">{status}</span>
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col lg:flex-row gap-12 items-start justify-center">
-        
-        {/* Game Board Area */}
-        <div className="flex-1 flex flex-col items-center w-full max-w-[600px] mx-auto">
-          
-          {/* Opponent Profile */}
-          <div className="w-full flex items-center gap-3 mb-4 px-2">
-             <div className="w-10 h-10 rounded-md bg-base-800 border border-white/5 flex items-center justify-center">
-               🤖
-             </div>
-             <div>
-               <div className="text-sm font-bold text-white">Stockfish Lite</div>
-               <div className="text-xs text-text-muted">Rating: 1400 • Level: {difficulty}</div>
-             </div>
+      <div className="flex flex-1 flex-col items-start justify-center gap-12 lg:flex-row">
+        <div className="mx-auto flex w-full max-w-[600px] flex-1 flex-col items-center">
+          <div className="mb-4 flex w-full items-center gap-3 px-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-md border border-white/5 bg-base-800 text-xs font-black text-text-secondary">AI</div>
+            <div>
+              <div className="text-sm font-bold text-white">Stockfish Lite</div>
+              <div className="text-xs text-text-muted">Rating: 1400 - Level: {difficulty}</div>
+            </div>
           </div>
 
-          {/* The Board */}
-          <div className="bg-base-800 p-3 sm:p-4 rounded-xl border border-white/5 shadow-[0_20px_60px_rgba(0,0,0,0.5)] w-full aspect-square max-h-[600px] flex flex-col">
-            {boardRows.map((row, rIndex) => (
-              <div key={row} className="flex-1 flex w-full">
-                {boardCols.map((col, cIndex) => {
+          <div className="flex aspect-square max-h-[600px] w-full flex-col rounded-xl border border-white/5 bg-base-800 p-3 shadow-[0_20px_60px_rgba(0,0,0,0.5)] sm:p-4">
+            {boardRows.map((row, rowIndex) => (
+              <div key={row} className="flex w-full flex-1">
+                {boardCols.map((col, colIndex) => {
                   const square = `${col}${row}` as Square;
                   const piece = game.get(square);
-                  const isLight = (rIndex + cIndex) % 2 === 0;
+                  const isLight = (rowIndex + colIndex) % 2 === 0;
                   const isSelected = selectedSquare === square;
-                  const isLastMove = moveHistory.length > 0 && false; // simplification
-                  const isValidMove = validMoves.some((m) => m.to === square);
+                  const isValidMove = validMoves.some((move) => move.to === square);
 
                   return (
                     <button
                       key={square}
                       onClick={() => handleSquareClick(square)}
                       className={cn(
-                        "flex-1 relative flex items-center justify-center text-3xl sm:text-5xl transition-colors select-none",
+                        "relative flex flex-1 select-none items-center justify-center text-2xl font-black uppercase transition-colors sm:text-4xl",
                         isLight ? "bg-[#cfd0ce]" : "bg-[#6c7b64]",
-                        isSelected && "ring-inset ring-4 ring-accent-blue/60 bg-accent-blue/30",
-                        isValidMove && !piece && "after:content-[''] after:w-4 after:h-4 after:rounded-full after:bg-black/20",
-                        isValidMove && piece && "ring-inset ring-4 ring-black/20"
+                        isSelected && "ring-4 ring-inset ring-accent-blue/60",
+                        isValidMove && !piece && "after:h-4 after:w-4 after:rounded-full after:bg-black/25 after:content-['']",
+                        isValidMove && piece && "ring-4 ring-inset ring-black/25",
                       )}
                     >
                       {piece && (
-                        <span className={cn(
-                          "cursor-pointer drop-shadow-md",
-                          piece.color === "w" ? "text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]" : "text-black"
-                        )}>
-                          {PIECE_SYMBOLS[piece.color === 'w' ? piece.type.toUpperCase() : piece.type]}
+                        <span className={piece.color === "w" ? "text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]" : "text-black"}>
+                          {PIECE_SYMBOLS[piece.color === "w" ? piece.type.toUpperCase() : piece.type]}
                         </span>
                       )}
-                      
-                      {/* Coordinates (bottom-right edge) */}
-                      {cIndex === 0 && <span className={cn("absolute top-1 left-1 text-[10px] font-bold", isLight ? "text-[#6c7b64]" : "text-[#cfd0ce]")}>{row}</span>}
-                      {rIndex === 7 && <span className={cn("absolute bottom-1 right-1 text-[10px] font-bold", isLight ? "text-[#6c7b64]" : "text-[#cfd0ce]")}>{col}</span>}
+                      {colIndex === 0 && <span className={cn("absolute left-1 top-1 text-[10px] font-bold", isLight ? "text-[#6c7b64]" : "text-[#cfd0ce]")}>{row}</span>}
+                      {rowIndex === 7 && <span className={cn("absolute bottom-1 right-1 text-[10px] font-bold", isLight ? "text-[#6c7b64]" : "text-[#cfd0ce]")}>{col}</span>}
                     </button>
                   );
                 })}
@@ -196,87 +184,73 @@ export default function ChessPage() {
             ))}
           </div>
 
-          {/* Player Profile */}
-          <div className="w-full flex items-center justify-between mt-4 px-2">
-             <div className="flex items-center gap-3">
-               <div className="w-10 h-10 rounded-md bg-base-800 border border-white/5 overflow-hidden">
-                 <img src="https://api.dicebear.com/9.x/bottts-neutral/svg?seed=ProGamer42" alt="User" className="w-full h-full" />
-               </div>
-               <div>
-                 <div className="text-sm font-bold text-white">ProGamer42 (You)</div>
-                 <div className="text-xs text-text-muted">Rating: 1250</div>
-               </div>
-             </div>
-             
-             {gameOver && (
-                <Button onClick={resetGame} variant="secondary" size="sm">
-                  <RefreshCcw className="w-4 h-4 mr-2" />
-                  Rematch
-                </Button>
-             )}
+          <div className="mt-4 flex w-full items-center justify-between px-2">
+            <div className="flex items-center gap-3">
+              <img src="https://api.dicebear.com/9.x/bottts-neutral/svg?seed=ProGamer42" alt="User" className="h-10 w-10 rounded-md border border-white/5 bg-base-800" />
+              <div>
+                <div className="text-sm font-bold text-white">ProGamer42 (You)</div>
+                <div className="text-xs text-text-muted">Rating: 1250</div>
+              </div>
+            </div>
+
+            {gameOver && (
+              <Button onClick={resetGame} variant="secondary" size="sm">
+                <RefreshCcw className="mr-2 h-4 w-4" />
+                Rematch
+              </Button>
+            )}
           </div>
         </div>
 
-        {/* Sidebar Data (Desktop) */}
-        <div className="w-full lg:w-80 shrink-0 flex flex-col gap-6">
-          
-          {/* Match Settings */}
-          <div className="bg-base-800/30 rounded-xl border border-white/5 p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Settings2 className="w-4 h-4 text-text-muted" />
+        <div className="flex w-full shrink-0 flex-col gap-6 lg:w-80">
+          <div className="rounded-xl border border-white/5 bg-base-800/30 p-6">
+            <div className="mb-4 flex items-center gap-2">
+              <Settings2 className="h-4 w-4 text-text-muted" />
               <h3 className="text-sm font-semibold text-white">Match Settings</h3>
             </div>
-            <div>
-              <label className="client-label mb-3 block">AI Difficulty</label>
-              <div className="grid grid-cols-3 gap-2">
-                {(["easy", "medium", "hard"] as Difficulty[]).map((level) => (
-                  <button
-                    key={level}
-                    onClick={() => { setDifficulty(level); resetGame(); }}
-                    className={cn(
-                      "px-2 py-2 rounded-md text-xs font-semibold capitalize transition-all border",
-                      difficulty === level 
-                        ? "bg-white text-base-900 border-white" 
-                        : "bg-base-800 text-text-secondary border-white/5 hover:bg-base-700 hover:text-white"
-                    )}
-                  >
-                    {level}
-                  </button>
-                ))}
-              </div>
+            <label className="client-label mb-3 block">AI Difficulty</label>
+            <div className="grid grid-cols-3 gap-2">
+              {(["easy", "medium", "hard"] as Difficulty[]).map((level) => (
+                <button
+                  key={level}
+                  onClick={() => {
+                    setDifficulty(level);
+                    resetGame();
+                  }}
+                  className={cn(
+                    "rounded-md border px-2 py-2 text-xs font-semibold capitalize transition-all",
+                    difficulty === level
+                      ? "border-white bg-white text-base-900"
+                      : "border-white/5 bg-base-800 text-text-secondary hover:bg-base-700 hover:text-white",
+                  )}
+                >
+                  {level}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Move History */}
-          <div className="bg-base-800/30 rounded-xl border border-white/5 p-0 flex-1 min-h-[300px] flex flex-col overflow-hidden">
-            <div className="flex items-center gap-2 p-4 border-b border-white/5 bg-base-800/50">
-              <Shield className="w-4 h-4 text-text-muted" />
+          <div className="flex min-h-[300px] flex-1 flex-col overflow-hidden rounded-xl border border-white/5 bg-base-800/30">
+            <div className="flex items-center gap-2 border-b border-white/5 bg-base-800/50 p-4">
+              <Shield className="h-4 w-4 text-text-muted" />
               <h3 className="text-sm font-semibold text-white">Move History</h3>
             </div>
-            <div className="p-4 overflow-y-auto flex-1 text-sm font-medium text-text-secondary">
+            <div className="flex-1 overflow-y-auto p-4 text-sm font-medium text-text-secondary">
               {moveHistory.length === 0 ? (
-                <div className="text-text-muted text-center py-8">No moves yet</div>
+                <div className="py-8 text-center text-text-muted">No moves yet</div>
               ) : (
-                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-                  {moveHistory.map((move, i) => {
-                    if (i % 2 === 0) {
-                      return (
-                        <div key={i} className="flex gap-4">
-                          <span className="text-text-muted w-4">{Math.floor(i / 2) + 1}.</span>
-                          <span className="text-white">{move}</span>
-                          {moveHistory[i + 1] && (
-                            <span className="text-white">{moveHistory[i + 1]}</span>
-                          )}
-                        </div>
-                      );
-                    }
-                    return null;
-                  })}
+                <div className="space-y-2">
+                  {Array.from({ length: Math.ceil(moveHistory.length / 2) }, (_, index) => (
+                    <div key={index} className="grid grid-cols-[32px_1fr_1fr] gap-3">
+                      <span className="text-text-muted">{index + 1}.</span>
+                      <span className="text-white">{moveHistory[index * 2]}</span>
+                      <span className="text-white">{moveHistory[index * 2 + 1] ?? ""}</span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
           </div>
-
         </div>
       </div>
     </div>

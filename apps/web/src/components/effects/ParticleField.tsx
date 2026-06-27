@@ -25,7 +25,7 @@ export function ParticleField() {
     if (!ctx) return;
 
     let animationId: number;
-    let particles: Particle[] = [];
+    const particles: Particle[] = [];
 
     const colors = [
       "rgba(0, 212, 255, ",   // neon blue

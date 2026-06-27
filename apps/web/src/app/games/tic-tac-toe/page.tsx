@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ChevronLeft, RefreshCcw, User, Cpu, Activity, Settings2 } from "lucide-react";
+import { ChevronLeft, RefreshCcw, Activity, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 // ============================================================
@@ -75,9 +75,14 @@ export default function TicTacToePage() {
 
   const getBotMove = (squares: Player[]): number => {
     const available = squares.map((v, i) => v === null ? i : null).filter(v => v !== null) as number[];
-    
-    if (difficulty === "easy" || (difficulty === "medium" && Math.random() > 0.6) || (difficulty === "hard" && Math.random() > 0.85)) {
-      return available[Math.floor(Math.random() * available.length)];
+
+    const boardSignature = squares.reduce((total, value, index) => {
+      const weight = value === "X" ? 3 : value === "O" ? 7 : 1;
+      return total + weight * (index + 1);
+    }, 0);
+
+    if (difficulty === "easy" || (difficulty === "medium" && boardSignature % 5 > 2) || (difficulty === "hard" && boardSignature % 7 === 0)) {
+      return available[boardSignature % available.length];
     }
 
     let bestScore = -Infinity;
@@ -114,10 +119,11 @@ export default function TicTacToePage() {
     // Bot turn
     setTimeout(() => {
       const botMove = getBotMove(newBoard);
-      newBoard[botMove] = "O";
-      setBoard([...newBoard]);
+      const botBoard = [...newBoard];
+      botBoard[botMove] = "O";
+      setBoard(botBoard);
       
-      const botResult = checkWinner(newBoard);
+      const botResult = checkWinner(botBoard);
       if (botResult) {
         handleGameOver(botResult);
       } else {

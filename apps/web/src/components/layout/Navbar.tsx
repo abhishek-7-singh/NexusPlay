@@ -4,13 +4,20 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Bell } from "lucide-react";
+import { Bell, Coins, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePlatformStore } from "@/lib/platform-store";
 
 export function Navbar() {
   const [activeSection, setActiveSection] = useState("");
   const pathname = usePathname();
   const isHomePage = pathname === "/";
+  const user = usePlatformStore((state) => state.user);
+  const hydrate = usePlatformStore((state) => state.hydrate);
+
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
 
   useEffect(() => {
     if (!isHomePage) return;
@@ -42,10 +49,10 @@ export function Navbar() {
   }, [isHomePage]);
 
   const navLinks = [
-    { label: "Library", id: "featured" },
-    { label: "Trending", id: "trending" },
-    { label: "Top Players", id: "players" },
-    { label: "Community", id: "community" },
+    { label: "Library", href: "/games", id: "featured" },
+    { label: "Lobbies", href: "/games#lobbies", id: "trending" },
+    { label: "Rankings", href: "/leaderboard", id: "players" },
+    { label: "Store", href: "/store", id: "store" },
   ];
 
   return (
@@ -65,19 +72,21 @@ export function Navbar() {
           {/* Desktop Links */}
           <nav className="hidden md:flex items-center gap-8">
             {navLinks.map((item) => {
-              const isActive = activeSection === item.id;
-              const href = isHomePage ? `#${item.id}` : `/#${item.id}`;
+              const isActive = pathname === item.href || (isHomePage && activeSection === item.id);
+              const href = isHomePage && item.id !== "store" && item.href.startsWith("/")
+                ? item.href
+                : item.href;
               
               return (
                 <Link
-                  key={item.id}
+                  key={item.href}
                   href={href}
                   className={cn(
                     "text-sm font-semibold transition-colors relative py-2",
                     isActive ? "text-white" : "text-text-secondary hover:text-white"
                   )}
                   onClick={(e) => {
-                    if (isHomePage) {
+                    if (isHomePage && item.href.startsWith("#")) {
                       e.preventDefault();
                       document.getElementById(item.id)?.scrollIntoView({ behavior: "smooth" });
                     }
@@ -94,14 +103,26 @@ export function Navbar() {
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-6">
-          <button className="text-text-secondary hover:text-white transition-colors relative">
+        <div className="flex items-center gap-3 sm:gap-5">
+          <Link href="/store" className="hidden lg:flex items-center gap-2 text-xs font-bold text-text-secondary hover:text-white transition-colors">
+            <Coins className="h-4 w-4 text-accent-cyan" />
+            {user.coins.toLocaleString()}
+          </Link>
+
+          <button className="text-text-secondary hover:text-white transition-colors relative" aria-label="Notifications">
             <Bell className="w-5 h-5" />
             <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-accent-blue ring-2 ring-base-900" />
           </button>
+
+          <Button variant="secondary" size="sm" asChild className="hidden sm:inline-flex h-10 px-3">
+            <Link href="/profile" className="gap-2">
+              <UserRound className="h-4 w-4" />
+              <span className="max-w-28 truncate">{user.name}</span>
+            </Link>
+          </Button>
           
           <Button variant="default" size="sm" asChild className="h-10 px-6 font-bold shadow-[0_0_15px_rgba(0,212,255,0.15)]">
-            <Link href={isHomePage ? "#featured" : "/#featured"}>Play Now</Link>
+            <Link href="/games">Play Now</Link>
           </Button>
         </div>
       </div>

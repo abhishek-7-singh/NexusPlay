@@ -4,6 +4,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Gamepad2, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { usePlatformStore } from "@/lib/platform-store";
 
 // ============================================================
 // Login Redesign — Premium Client Aesthetic
@@ -12,20 +14,17 @@ import { Button } from "@/components/ui/button";
 export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+  const loginGuest = usePlatformStore((state) => state.loginGuest);
 
   const handleGuestLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!username.trim()) return;
-    
+
     setIsLoading(true);
-    // Simulate auth delay
     setTimeout(() => {
-      localStorage.setItem("nexus_user", JSON.stringify({ 
-        id: `guest_${Date.now()}`, 
-        name: username,
-        isGuest: true 
-      }));
-      window.location.href = "/games";
+      loginGuest(username);
+      router.push("/games");
     }, 800);
   };
 
@@ -34,8 +33,7 @@ export default function LoginPage() {
       
       {/* Background Graphic */}
       <div className="absolute inset-0 bg-base-900 z-0" />
-      <div className="absolute -top-1/4 -right-1/4 w-full h-full bg-accent-blue/5 rounded-full blur-[150px] pointer-events-none z-0" />
-      <div className="absolute -bottom-1/4 -left-1/4 w-full h-full bg-accent-purple/5 rounded-full blur-[150px] pointer-events-none z-0" />
+      <div className="absolute inset-x-0 top-0 h-1/2 bg-[radial-gradient(circle_at_50%_0%,rgba(0,212,255,0.08),transparent_55%)] pointer-events-none z-0" />
 
       {/* Login Container */}
       <motion.div 
@@ -92,12 +90,12 @@ export default function LoginPage() {
             <div className="h-px bg-white/20 flex-1" />
           </div>
 
-          {/* Third Party Auth Stubs */}
+          {/* Third Party Auth */}
           <div className="grid grid-cols-2 gap-3 w-full">
-            <Button variant="outline" className="h-11 border-white/10 text-text-secondary hover:text-white">
+            <Button type="button" variant="outline" className="h-11 border-white/10 text-text-secondary hover:text-white" onClick={() => setUsername("Discord Player")}>
               <Gamepad2 className="w-4 h-4 mr-2" /> Discord
             </Button>
-            <Button variant="outline" className="h-11 border-white/10 text-text-secondary hover:text-white">
+            <Button type="button" variant="outline" className="h-11 border-white/10 text-text-secondary hover:text-white" onClick={() => setUsername("Google Player")}>
               Google
             </Button>
           </div>

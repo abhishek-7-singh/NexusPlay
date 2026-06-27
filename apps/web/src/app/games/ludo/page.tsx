@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { ChevronLeft, RefreshCcw, Activity, Users, Dice5 } from "lucide-react";
+import { ChevronLeft, RefreshCcw, Activity, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +12,6 @@ import { cn } from "@/lib/utils";
 // ============================================================
 
 const COLORS = ["#EF4444", "#3B82F6", "#10B981", "#F59E0B"];
-const COLOR_NAMES = ["Red", "Blue", "Green", "Yellow"];
 
 interface Token {
   position: number; 
@@ -88,7 +87,7 @@ export default function LudoPage() {
     return valid;
   }, []);
 
-  const nextTurn = useCallback((gotExtraTurn: boolean, updatedPlayers: LudoPlayer[]) => {
+  function nextTurn(gotExtraTurn: boolean, updatedPlayers: LudoPlayer[]) {
     if (!gotExtraTurn) {
       const next = (currentPlayer + 1) % 4;
       setCurrentPlayer(next);
@@ -162,7 +161,7 @@ export default function LudoPage() {
               else setTimeout(() => nextTurn(false, newPlayers), 500);
             }
           }, 600);
-        }, 800 + Math.random() * 600);
+        }, 900);
       } else {
         setMessage("Your turn! Roll the dice.");
       }
@@ -171,7 +170,7 @@ export default function LudoPage() {
       setDiceValue(0);
       setMessage("You rolled a 6! Roll again.");
     }
-  }, [currentPlayer, gameOver]);
+  }
 
   const rollDice = () => {
     if (hasRolled || isRolling || gameOver || players[currentPlayer].isBot) return;
@@ -190,10 +189,10 @@ export default function LudoPage() {
 
         const valid = getValidMoves(players[currentPlayer], finalRoll);
         if (valid.length === 0) {
-          setMessage(`Rolled ${finalRoll} — no valid moves`);
+          setMessage(`Rolled ${finalRoll} - no valid moves`);
           setTimeout(() => nextTurn(false, players), 1200);
         } else {
-          setMessage(`Rolled ${finalRoll} — choose a token`);
+          setMessage(`Rolled ${finalRoll} - choose a token`);
         }
       }
     }, 60);
@@ -253,7 +252,7 @@ export default function LudoPage() {
     setMessage("Roll the dice to start");
   };
 
-  const DICE_FACES = ["", "⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+  const DICE_FACES = ["", "1", "2", "3", "4", "5", "6"];
 
   return (
     <div className="flex-1 flex flex-col pt-20 px-8 pb-8 max-w-[1400px] mx-auto w-full">
@@ -322,7 +321,7 @@ export default function LudoPage() {
                           )}
                           style={(!token.isHome && !token.isFinished) ? { borderColor: COLORS[player.color], color: COLORS[player.color] } : {}}
                         >
-                          {token.isFinished ? "✓" : token.isHome ? "HOME" : token.position}
+                          {token.isFinished ? "DONE" : token.isHome ? "HOME" : token.position}
                         </button>
                       );
                     })}
@@ -347,7 +346,7 @@ export default function LudoPage() {
                  transition={{ duration: 0.3, repeat: isRolling ? Infinity : 0 }}
                  className={isRolling ? "text-accent-blue drop-shadow-[0_0_15px_rgba(0,212,255,0.5)]" : "text-white"}
                >
-                 {diceValue ? DICE_FACES[diceValue] : "🎲"}
+                 {diceValue ? DICE_FACES[diceValue] : "ROLL"}
                </motion.div>
             </button>
             

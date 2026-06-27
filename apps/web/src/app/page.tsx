@@ -2,9 +2,8 @@
 
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Play, ArrowRight, Gamepad2, Users, Clock, Trophy, MessageSquare, Activity, Crown, Medal } from "lucide-react";
+import { Play, ArrowRight, Gamepad2, Users, Clock, Trophy, MessageSquare, Activity, Crown } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 
 // ============================================================
 // DATA MODELS
@@ -119,13 +118,13 @@ export default function Home() {
             
             <div className="flex items-center gap-4">
               <Button size="lg" className="h-14 px-8 text-base shadow-[0_0_30px_rgba(0,212,255,0.2)]" asChild>
-                <Link href="#featured">
+                <Link href="/games">
                   <Play className="w-5 h-5 mr-2 fill-current" />
                   Play Free Now
                 </Link>
               </Button>
               <Button size="lg" variant="secondary" className="h-14 px-8 text-base" asChild>
-                <Link href="#trending">
+                <Link href="/games#lobbies">
                   View Live Lobbies
                 </Link>
               </Button>
@@ -142,9 +141,11 @@ export default function Home() {
               <h2 className="client-heading-2 mb-2">Featured Games</h2>
               <p className="text-text-secondary font-medium">Hand-crafted multiplayer experiences.</p>
             </div>
-            <Button variant="ghost" className="text-text-secondary hover:text-white group shrink-0">
-              Browse Full Library
-              <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            <Button variant="ghost" className="text-text-secondary hover:text-white group shrink-0" asChild>
+              <Link href="/games">
+                Browse Full Library
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+              </Link>
             </Button>
           </div>
 
@@ -231,8 +232,10 @@ export default function Home() {
                   <p className="text-sm text-text-secondary">{lobby.game}</p>
                 </div>
                 
-                <Button variant="secondary" className="w-full opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all">
-                  Join Lobby
+                <Button variant="secondary" className="w-full opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all" asChild>
+                  <Link href={`/rooms/${lobby.id === "chess" ? "NOVA82" : lobby.id === "ludo" ? "PARTY7" : "BLAST4"}?game=${lobby.id}`}>
+                    Join Lobby
+                  </Link>
                 </Button>
               </div>
             ))}
@@ -255,7 +258,9 @@ export default function Home() {
                   </h2>
                   <p className="text-text-secondary font-medium">Season ends in 12 days.</p>
                 </div>
-                <Button variant="outline" size="sm">View Full Ladder</Button>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/leaderboard">View Full Ladder</Link>
+                </Button>
               </div>
               
               <div className="overflow-x-auto">
@@ -324,7 +329,9 @@ export default function Home() {
                 ))}
               </div>
 
-              <Button variant="secondary" className="w-full mt-8">View Activity Feed</Button>
+              <Button variant="secondary" className="w-full mt-8" asChild>
+                <Link href="/profile">View Activity Feed</Link>
+              </Button>
             </div>
 
           </div>
@@ -345,9 +352,9 @@ export default function Home() {
             </Link>
             
             <div className="flex items-center gap-6 text-sm font-semibold text-text-secondary">
-              <Link href="#" className="hover:text-white transition-colors">Privacy Policy</Link>
-              <Link href="#" className="hover:text-white transition-colors">Terms of Service</Link>
-              <Link href="#" className="hover:text-white transition-colors">Support</Link>
+              <Link href="/store" className="hover:text-white transition-colors">Store</Link>
+              <Link href="/leaderboard" className="hover:text-white transition-colors">Rankings</Link>
+              <Link href="/profile" className="hover:text-white transition-colors">Profile</Link>
             </div>
           </div>
           
